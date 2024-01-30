@@ -27,9 +27,8 @@ export class BooksController{
 
     @Get()
     async getAllBooks(){
-        const books = await {books: this.booksService.getBooks()};
-
-        return books.map(book => ({id: book.id, ISBN: book.ISBN, title: book.title, author: book.author, description: book.description, yearofpublication: book.yearofpublication}));
+        
+        return this.booksService.getBooks();
     }
 
     @Get(':title')

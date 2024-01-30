@@ -31,7 +31,7 @@ export class BooksService{
     async getBooks(){
         const books = await this.bookModel.find().exec();
         
-        return books as book[];
+        return books.map(book => ({id: book.id, ISBN: book.ISBN, title: book.title, author: book.author, description: book.description, yearofpublication: book.yearofpublication}));
     }
 
     getSingleBook(title : string){
