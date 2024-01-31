@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete } from '@nestjs/common';
 import { BooksService } from './books.service';
+import { title } from 'process';
 
 
 @Controller('books')
@@ -27,25 +28,42 @@ export class BooksController{
 
     @Get()
     async getAllBooks(){
-        
-        return this.booksService.getBooks();
+        const books = await this.booksService.getBooks();
+
+        return books;
     }
 
     @Get(':title')
     getBook(@Param('title') title: string,){
+        
         return this.booksService.getSingleBook(title); 
+        
     }
 
-    @Patch(':title')
-    updateBook(
-        @Param('ISBN') ISBN: number,
+    @Patch(':ISBN')
+    async updateBook(
+        @Param('ISBN') ISBN: string,
         @Body('title') booktitle: string,
         @Body('author') bookauthor: string,
         @Body('Description') bookdes: string,
-        @Body('yearofpublication') bookpub: string
+        @Body('yearofpublication') bookpub: number,
     ) {
+        await this.booksService.updateBook(ISBN, booktitle, bookauthor, bookdes, bookpub);
+
+        return null;
+    }
+
+    @Delete(':ISBN')
+    async removeBook(@Param('ISBN') ISBN: string){
+        
+        await this.booksService.deleteBook(ISBN);
+
+        return null;
 
     }
+
+
+
 }
 
 

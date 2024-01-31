@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-
 import { book } from "./book.model";
-import { constants } from "buffer";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Schema } from "mongoose";
-import { BooksModule } from "./books.module";
+import { Model } from "mongoose";
+import { identity } from "rxjs/internal/util/identity";
 
 
 @Injectable()
@@ -25,31 +23,84 @@ export class BooksService{
         
         const result = await newBook.save();
        
-        return result.id as number;
+        return result.ISBN as string;
     }
 
     async getBooks(){
         const books = await this.bookModel.find().exec();
         
-        return books.map(book => ({id: book.id, ISBN: book.ISBN, title: book.title, author: book.author, description: book.description, yearofpublication: book.yearofpublication}));
+        return books.map(book => ({ISBN: book.ISBN, title: book.title, author: book.author, description: book.description, yearofpublication: book.yearofpublication}));
     }
 
-    getSingleBook(title : string){
-        const book = this.books.find(book => book.title === title);
-        if(!book){
-            throw new NotFoundException("Book not found");
+    async getSingleBook(title : string){
+        const book = await this.findbook(title)[0];
+         
+        return {ISBN: book._ISBN, title: book.title, author: book.author, description: book.description, yearofpublication: book.yearofpublication};
+    }    
+        
+
+    async updateBook(ISBN: string, title: string, author: string, description: string, yearofpublication: number){
+        const updatedBook = await this.findbook(ISBN);
+
+        if(title){
+
+            updatedBook.title = title;
         }
-        return {...book}; 
+
+        if(author){
+
+            updatedBook.author = author;
+        }
+
+        if(description){
+
+            updatedBook.description = description;
+        }
+    
+        if(yearofpublication){
+
+            updatedBook.yearofpublication = yearofpublication;
+        }
+
+        updatedBook.save();
+
     }
 
-    updateBook(ISBN: number, title: string, author: string, description: string, yearofpublication: number){
-        const book = this.books.find(book => book.title === title);
-        if(!book){
-            throw new NotFoundException("Book not found");
+    async deleteBook(ISBN : string){
+
+        const result = await this.bookModel.deleteOne({_ISBN: ISBN}).exec();
+
+        /*if (result.n === 0){
+            throw new NotFoundException('Could not find book');
+        }*/
+        console.log(result);
+    }
+
+    private async findbook(title: string): Promise<book> {
+
+        let book;
+        try {
+
+            book = await this.bookModel.findById(title).exec();
+        } catch(error){
+
+            throw new NotFoundException('Could not find book');
         }
 
+        if(!book){
+            throw new NotFoundException('Could not find book');
+        }
 
-        return {...book}
+        return book;
+
+        /*const bookIndex = this.books.findIndex(book => book.ISBN === ISBN);
+        const book = this.books[bookIndex];
+        
+        if(!book){
+
+            throw new NotFoundException("Book not found");
+        }
+        return [book, bookIndex];*/
 
     }
 

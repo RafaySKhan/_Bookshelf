@@ -9,9 +9,9 @@ export const BookSchema = new mongoose.Schema({
 
 })
 
-export interface book{
+export interface book extends mongoose.Document{
 
-        ISBN: number,
+        ISBN: string,
         title: string,
         author:string, 
         description: string,
